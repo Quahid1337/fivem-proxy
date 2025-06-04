@@ -1,35 +1,33 @@
-import chromium from 'chrome-aws-lambda';
+import express from 'express';
 import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 
-export default async function handler(req, res) {
+const app = express();
+
+app.get('/api/server', async (req, res) => {
   let browser = null;
-
   try {
-    const browserExecutablePath = await chromium.executablePath;
-
     browser = await puppeteer.launch({
       args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: browserExecutablePath,
+      executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
 
     const page = await browser.newPage();
-
     await page.goto('https://servers-frontend.fivem.net/api/servers/single/ajyydz', {
       waitUntil: 'networkidle0',
       timeout: 60000,
     });
 
     const body = await page.evaluate(() => document.body.innerText);
-
     const json = JSON.parse(body);
-    res.status(200).json(json);
-  } catch (error) {
-    res.status(500).json({ error: error.toString() });
+    res.json(json);
+  } catch (e) {
+    res.status(500).json({ error: e.toString() });
   } finally {
-    if (browser !== null) {
-      await browser.close();
-    }
+    if (browser) await browser.close();
   }
-}
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
