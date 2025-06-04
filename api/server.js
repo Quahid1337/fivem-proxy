@@ -5,15 +5,12 @@ export default async function handler(req, res) {
   let browser = null;
 
   try {
-    const executablePath =
-      process.env.AWS_EXECUTION_ENV
-        ? await chromium.executablePath
-        : '/usr/bin/chromium-browser'; // for local testing fallback
+    const browserExecutablePath = await chromium.executablePath;
 
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath,
+      executablePath: browserExecutablePath,
       headless: chromium.headless,
     });
 
