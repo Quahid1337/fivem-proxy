@@ -1,26 +1,27 @@
 import express from 'express';
-import puppeteer from 'puppeteer-core';
-import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer';
 
 const app = express();
 
 app.get('/api/server', async (req, res) => {
-  let browser = null;
+  let browser;
+
   try {
     browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-    });    
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
 
     const page = await browser.newPage();
+
     await page.goto('https://servers-frontend.fivem.net/api/servers/single/ajyydz', {
       waitUntil: 'networkidle0',
-      timeout: 60000,
+      timeout: 60000
     });
 
     const body = await page.evaluate(() => document.body.innerText);
     const json = JSON.parse(body);
+
     res.json(json);
   } catch (e) {
     res.status(500).json({ error: e.toString() });
@@ -29,5 +30,7 @@ app.get('/api/server', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
