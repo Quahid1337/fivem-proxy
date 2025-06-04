@@ -5,10 +5,15 @@ export default async function handler(req, res) {
   let browser = null;
 
   try {
+    const executablePath =
+      process.env.AWS_EXECUTION_ENV
+        ? await chromium.executablePath
+        : '/usr/bin/chromium-browser'; // for local testing fallback
+
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
+      executablePath,
       headless: chromium.headless,
     });
 
@@ -16,7 +21,7 @@ export default async function handler(req, res) {
 
     await page.goto('https://servers-frontend.fivem.net/api/servers/single/ajyydz', {
       waitUntil: 'networkidle0',
-      timeout: 60000
+      timeout: 60000,
     });
 
     const body = await page.evaluate(() => document.body.innerText);
