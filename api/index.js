@@ -8,10 +8,10 @@ app.get('/api/server', async (req, res) => {
   let browser = null;
   try {
     browser = await puppeteer.launch({
-      args: chromium.args,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
       executablePath: await chromium.executablePath,
       headless: chromium.headless,
-    });
+    });    
 
     const page = await browser.newPage();
     await page.goto('https://servers-frontend.fivem.net/api/servers/single/ajyydz', {
